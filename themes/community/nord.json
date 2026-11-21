@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "name": "Nord",
+  "appearance": "dark",
+  "canvas": "#2e3440",
+  "accent": "#88c0d0",
+  "id": "nord"
+}

@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "name": "Monokai",
+  "appearance": "dark",
+  "canvas": "#272822",
+  "accent": "#f92672",
+  "id": "monokai"
+}

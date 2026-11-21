@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "name": "Gruvbox Dark",
+  "appearance": "dark",
+  "canvas": "#282828",
+  "accent": "#fe8019",
+  "id": "gruvbox-dark"
+}

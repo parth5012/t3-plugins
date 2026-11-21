@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "name": "Catppuccin Latte",
+  "appearance": "light",
+  "canvas": "#eff1f5",
+  "accent": "#8839ef",
+  "id": "catppuccin-latte"
+}

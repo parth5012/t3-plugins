@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "name": "GitHub Dark",
+  "appearance": "dark",
+  "canvas": "#0d1117",
+  "accent": "#58a6ff",
+  "id": "github-dark"
+}

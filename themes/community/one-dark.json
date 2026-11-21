@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "name": "One Dark",
+  "appearance": "dark",
+  "canvas": "#282c34",
+  "accent": "#61afef",
+  "id": "one-dark"
+}

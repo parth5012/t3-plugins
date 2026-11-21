@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "name": "Glass Light",
+  "appearance": "light",
+  "canvas": "#f4f6fa",
+  "accent": "#3b82f6",
+  "id": "glass-light"
+}

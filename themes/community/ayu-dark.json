@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "name": "Ayu Dark",
+  "appearance": "dark",
+  "canvas": "#0a0e14",
+  "accent": "#e6b450",
+  "id": "ayu-dark"
+}

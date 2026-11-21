@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "name": "Solarized Dark",
+  "appearance": "dark",
+  "canvas": "#002b36",
+  "accent": "#2aa198",
+  "id": "solarized-dark"
+}
