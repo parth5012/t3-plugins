@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prompt Library — interaction demo</title>
+<style>
+  :root {
+    --bg: #151517; --panel: #1d1d20; --panel-2: #232327; --border: #34343a;
+    --fg: #ededf0; --muted: #8d8d96; --accent: #7aa2f7; --accent-soft: #26304a;
+    --destructive: #f7768e;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; height: 100vh; display: flex; font: 13px/1.45 system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--fg); }
+  button { font: inherit; color: inherit; cursor: pointer; }
+
+  /* sidebar */
+  aside { width: 286px; flex: none; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+  .brand { display: flex; align-items: center; gap: 8px; padding: 14px 14px 10px; font-weight: 650; letter-spacing: -.01em; }
+  .brand .dot { width: 16px; height: 16px; border-radius: 5px; background: linear-gradient(135deg, var(--accent), #bb9af7); }
+  .shelf { margin: 6px 8px 10px; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; background: var(--panel-2); }
+  .shelf-head { display: flex; align-items: center; gap: 6px; width: 100%; padding: 9px 10px; background: none; border: 0; text-align: left; }
+  .shelf-head .chev { transition: transform .15s; color: var(--muted); }
+  .shelf-head .chev.collapsed { transform: rotate(-90deg); }
+  .shelf-head .title { flex: 1; font-weight: 600; }
+  .shelf-head .count { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .icon-btn { width: 24px; height: 24px; display: grid; place-items: center; border: 0; border-radius: 6px; background: none; color: var(--muted); }
+  .icon-btn:hover { background: #ffffff12; color: var(--fg); }
+  .shelf-body { padding: 2px 7px 9px; }
+  .search { width: 100%; height: 29px; padding: 0 9px; margin-bottom: 5px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--fg); outline: none; }
+  .search:focus { border-color: var(--accent); }
+  ul { list-style: none; margin: 0; padding: 0; }
+  .prompt-row { display: flex; align-items: center; gap: 2px; border-radius: 6px; }
+  .prompt-row:hover { background: #ffffff0d; }
+  .prompt-main { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 6px 8px; border: 0; background: none; text-align: left; }
+  .prompt-main b { font-weight: 550; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .prompt-main small { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row-actions { display: none; gap: 1px; padding-right: 3px; }
+  .prompt-row:hover .row-actions { display: flex; }
+  .empty { padding: 8px; color: var(--muted); font-size: 12px; }
+  .threads { padding: 0 12px; color: var(--muted); font-size: 12px; line-height: 2.1; }
+  .threads .section { color: #6f6f79; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; margin-top: 10px; }
+  .threads .row.active { color: var(--fg); background: #ffffff0c; border-radius: 5px; padding-left: 6px; margin-left: -6px; }
+  .spacer { flex: 1; }
+  .palette-hint { padding: 12px; border-top: 1px solid var(--border); color: var(--muted); font-size: 11px; }
+
+  /* main */
+  main { flex: 1; display: flex; flex-direction: column; padding: 26px 34px; }
+  .stage { flex: 1; }
+  .stage h1 { font-size: 22px; margin: 0 0 6px; letter-spacing: -.02em; }
+  .stage p { color: var(--muted); margin: 0 0 20px; }
+  .steps { display: flex; gap: 8px; flex-wrap: wrap; }
+  .step { border: 1px solid var(--border); border-radius: 999px; padding: 5px 11px; color: var(--muted); font-size: 12px; }
+  .step b { color: var(--fg); font-weight: 600; }
+  .composer { border: 1px solid var(--border); border-radius: 12px; background: var(--panel); overflow: hidden; }
+  .composer-head { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 11px; }
+  .composer-head .badge { border: 1px solid var(--border); border-radius: 5px; padding: 2px 6px; }
+  #composer { width: 100%; min-height: 116px; resize: none; border: 0; outline: none; padding: 14px; background: transparent; color: var(--fg); font: 14px/1.5 inherit; }
+  .send-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 12px; border-top: 1px solid var(--border); color: var(--muted); font-size: 11px; }
+  .send { background: var(--accent); color: #10131a; border: 0; border-radius: 7px; padding: 7px 15px; font-weight: 650; }
+
+  /* overlays */
+  .overlay { position: fixed; inset: 0; background: #0009; display: none; align-items: flex-start; justify-content: center; padding-top: 14vh; z-index: 10; }
+  .overlay.open { display: flex; }
+  .dialog, .palette { width: min(560px, 92vw); background: var(--panel); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 24px 70px #000a; overflow: hidden; }
+  .dialog header, .palette header { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  .dialog header h2, .palette header h2 { margin: 0 0 3px; font-size: 15px; }
+  .dialog header p, .palette header p { margin: 0; color: var(--muted); font-size: 12px; }
+  .dialog .body { padding: 16px; display: grid; gap: 12px; }
+  .dialog label { display: grid; gap: 5px; font-size: 12px; color: var(--muted); }
+  .dialog input, .dialog textarea { padding: 9px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg); color: var(--fg); font: inherit; outline: none; }
+  .dialog input:focus, .dialog textarea:focus { border-color: var(--accent); }
+  .dialog textarea { min-height: 110px; resize: vertical; }
+  .footer { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); }
+  .btn { border: 1px solid var(--border); background: var(--panel-2); border-radius: 7px; padding: 7px 13px; }
+  .btn.primary { background: var(--accent); color: #10131a; border-color: transparent; font-weight: 650; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .palette input { width: 100%; padding: 14px 16px; border: 0; border-bottom: 1px solid var(--border); background: transparent; color: var(--fg); font-size: 14px; outline: none; }
+  .palette .group { padding: 8px; }
+  .palette .group-label { padding: 5px 8px; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  .pitem { display: flex; align-items: center; gap: 9px; width: 100%; padding: 9px 10px; border: 0; border-radius: 7px; background: none; text-align: left; }
+  .pitem:hover, .pitem.hi { background: var(--accent-soft); }
+  .pitem small { margin-left: auto; color: var(--muted); }
+  .toast { position: fixed; right: 22px; bottom: 22px; background: var(--panel); border: 1px solid var(--accent); border-radius: 9px; padding: 11px 15px; box-shadow: 0 12px 40px #0009; opacity: 0; transform: translateY(8px); transition: .2s; pointer-events: none; z-index: 20; }
+  .toast.show { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand"><span class="dot"></span> T3 Code</div>
+  <div class="shelf">
+    <button class="shelf-head" id="shelfToggle" aria-expanded="true">
+      <span class="chev" id="chev">▾</span><span class="title">★ Prompt Library</span><span class="count" id="count">(0)</span>
+      <span class="icon-btn" id="addBtn" role="button" title="Save current prompt">＋</span>
+    </button>
+    <div class="shelf-body" id="shelfBody">
+      <input class="search" id="search" placeholder="Search prompts…">
+      <ul id="list"></ul>
+    </div>
+  </div>
+  <div class="threads">
+    <div class="section">Pinned</div>
+    <div class="row active">● Prompt Library work</div>
+    <div class="section">Active</div>
+    <div class="row">○ t3-plugins setup</div>
+    <div class="section">Snoozed · Settled</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="palette-hint">⌘K — command palette &amp; quick insert</div>
+</aside>
+
+<main>
+  <div class="stage">
+    <h1>Prompt Library</h1>
+    <p>Save a prompt once. Drop it into any thread from the sidebar or the command palette.</p>
+    <div class="steps"><span class="step"><b>1</b> Type a prompt</span><span class="step"><b>2</b> Save with ＋</span><span class="step"><b>3</b> Reload</span><span class="step"><b>4</b> Click to insert</span></div>
+  </div>
+  <div class="composer">
+    <div class="composer-head"><span class="badge">gpt-5 · codex</span><span id="status">Composer</span></div>
+    <textarea id="composer" placeholder="Type a prompt…"></textarea>
+    <div class="send-row"><span>Text is appended — nothing is cleared or consumed</span><button class="send">Send ▲</button></div>
+  </div>
+</main>
+
+<div class="overlay" id="dialogOverlay">
+  <div class="dialog">
+    <header><h2 id="dialogTitle">New prompt</h2><p>Save a prompt you can drop into any thread without retyping it.</p></header>
+    <div class="body">
+      <label>Name<input id="dTitle" placeholder="Review for security"></label>
+      <label>Prompt<textarea id="dText" placeholder="What should the agent do?"></textarea></label>
+    </div>
+    <div class="footer"><button class="btn" id="dCancel">Cancel</button><button class="btn primary" id="dSave">Save prompt</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="paletteOverlay">
+  <div class="palette">
+    <header><h2>Command palette</h2><p>Search commands and saved prompts</p></header>
+    <input id="pSearch" placeholder="Search prompts…" autocomplete="off">
+    <div class="group"><div class="group-label">Prompt Library</div><div id="pList"></div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const KEY = "t3code:prompt-library:v1";
+const seed = [
+  { id: "seed-1", title: "Review for security", text: "Review this diff for security issues: auth, input validation, and secret handling. Report findings with file and line." },
+  { id: "seed-2", title: "Write tests for parser", text: "Write focused unit tests for the parser covering the happy path, empty input, and malformed input." },
+  { id: "seed-3", title: "Summarize this PR", text: "Summarize this PR in five bullets: what changed, why, risk, tests, and follow-ups." },
+];
+let entries = load();
+let expanded = true, query = "", editingId = null, hi = 0;
+
+function load() {
+  try { const raw = localStorage.getItem(KEY); if (raw) { const p = JSON.parse(raw); const entries = p?.state?.entries ?? p?.entries; if (Array.isArray(entries)) return entries; } } catch {}
+  return [...seed];
+}
+function persist() {
+  try { localStorage.setItem(KEY, JSON.stringify({ version: 1, state: { entries } })); } catch {}
+}
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 1800); }
+function preview(text) { const s = text.replace(/\s+/g, " ").trim(); return s.length > 54 ? s.slice(0, 54) + "…" : s; }
+function render() {
+  $("count").textContent = "(" + entries.length + ")";
+  const q = query.trim().toLowerCase();
+  const shown = entries.filter(e => e.title.toLowerCase().includes(q));
+  $("list").innerHTML = shown.length ? shown.map(e => `
+    <li class="prompt-row" data-id="${e.id}">
+      <button class="prompt-main" data-act="insert"><b>${escapeHtml(e.title)}</b><small>${escapeHtml(preview(e.text))}</small></button>
+      <span class="row-actions"><button class="icon-btn" data-act="edit" title="Edit">✎</button><button class="icon-btn" data-act="del" title="Delete">🗑</button></span>
+    </li>`).join("") : `<li class="empty">${entries.length ? "No prompts match “" + escapeHtml(query) + "”." : "No prompts yet. Use ＋ to save the current prompt."}</li>`;
+  renderPalette();
+}
+function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
+function insert(text) {
+  const c = $("composer");
+  c.value = c.value.trimEnd() + (c.value.trim() ? "\n\n" : "") + text;
+  c.focus(); c.setSelectionRange(c.value.length, c.value.length);
+  $("status").textContent = "Inserted — entry kept in library";
+}
+
+$("shelfToggle").onclick = (e) => { if (e.target.closest("#addBtn")) return; expanded = !expanded; $("chev").className = "chev" + (expanded ? "" : " collapsed"); $("shelfBody").style.display = expanded ? "" : "none"; };
+$("addBtn").onclick = (e) => { e.stopPropagation(); editingId = null; $("dialogTitle").textContent = "New prompt"; const src = $("composer").value.trim(); $("dTitle").value = src.split("\n")[0].slice(0, 60) || ""; $("dText").value = src; openDialog(); };
+$("search").oninput = (e) => { query = e.target.value; render(); };
+$("list").onclick = (e) => {
+  const btn = e.target.closest("[data-act]"); if (!btn) return;
+  const id = btn.closest("li").dataset.id; const entry = entries.find(x => x.id === id); if (!entry) return;
+  if (btn.dataset.act === "insert") insert(entry.text);
+  if (btn.dataset.act === "edit") { editingId = id; $("dialogTitle").textContent = "Edit prompt"; $("dTitle").value = entry.title; $("dText").value = entry.text; openDialog(); }
+  if (btn.dataset.act === "del") { if (confirm("Delete “" + entry.title + "”? This cannot be undone.")) { entries = entries.filter(x => x.id !== id); persist(); render(); toast("Prompt deleted"); } }
+};
+function openDialog() { $("dialogOverlay").classList.add("open"); $("dTitle").focus(); }
+function closeDialog() { $("dialogOverlay").classList.remove("open"); }
+$("dCancel").onclick = closeDialog;
+$("dialogOverlay").onclick = (e) => { if (e.target === $("dialogOverlay")) closeDialog(); };
+$("dSave").onclick = () => {
+  const title = $("dTitle").value.trim(), text = $("dText").value.trim();
+  if (!title || !text) return;
+  if (editingId) { const e = entries.find(x => x.id === editingId); if (e) Object.assign(e, { title, text }); }
+  else entries.unshift({ id: "p-" + Date.now(), title, text });
+  persist(); render(); closeDialog(); toast(editingId ? "Prompt updated" : "Prompt saved to library");
+};
+
+function renderPalette() {
+  const q = $("pSearch").value.trim().toLowerCase();
+  const shown = entries.filter(e => e.title.toLowerCase().includes(q));
+  hi = Math.min(hi, Math.max(0, shown.length - 1));
+  $("pList").innerHTML = shown.map((e, i) => `<button class="pitem ${i === hi ? "hi" : ""}" data-id="${e.id}"><span>★</span><span>${escapeHtml(e.title)}</span><small>Prompt Library</small></button>`).join("") || `<div class="empty">No matching prompts</div>`;
+}
+document.addEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $("pSearch").value = ""; hi = 0; renderPalette(); $("paletteOverlay").classList.add("open"); $("pSearch").focus(); }
+  if ($("paletteOverlay").classList.contains("open")) {
+    if (e.key === "Escape") $("paletteOverlay").classList.remove("open");
+    if (e.key === "ArrowDown") { hi++; renderPalette(); }
+    if (e.key === "ArrowUp") { hi = Math.max(0, hi - 1); renderPalette(); }
+    if (e.key === "Enter") { const items = [...$("pList").querySelectorAll(".pitem")]; const el = items[hi]; if (el) { const entry = entries.find(x => x.id === el.dataset.id); if (entry) { insert(entry.text); $("paletteOverlay").classList.remove("open"); toast("Inserted from command palette"); } } }
+  }
+});
+$("pSearch").oninput = () => { hi = 0; renderPalette(); };
+$("pList").onclick = (e) => { const el = e.target.closest(".pitem"); if (!el) return; const entry = entries.find(x => x.id === el.dataset.id); if (entry) { insert(entry.text); $("paletteOverlay").classList.remove("open"); toast("Inserted from command palette"); } };
+$("paletteOverlay").onclick = (e) => { if (e.target === $("paletteOverlay")) $("paletteOverlay").classList.remove("open"); };
+window.addEventListener("load", render);
+render();
+</script>
+</body>
+</html>
