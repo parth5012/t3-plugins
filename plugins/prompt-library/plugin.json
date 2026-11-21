@@ -1,0 +1,28 @@
+{
+  "schema": "t3-plugins/v1",
+  "id": "prompt-library",
+  "name": "Prompt Library",
+  "version": "1.0.0",
+  "kind": "ui-extension",
+  "description": "A permanent, reusable prompt library in the T3 Code sidebar and command palette. Save the current composer text, name it, and insert it into any thread without retyping or consuming the entry.",
+  "author": "parth5012",
+  "license": "MIT",
+  "compatibility": {
+    "t3code": ">=0.0.46"
+  },
+  "surfaces": ["web", "desktop"],
+  "storage": {
+    "key": "t3code:prompt-library:v1",
+    "scope": "browser-profile"
+  },
+  "files": {
+    "source": "files/",
+    "hostPatch": "patches/host-integration.patch",
+    "tests": "tests/"
+  },
+  "entryPoints": [
+    "apps/web/src/components/sidebar/PromptLibraryShelf.tsx",
+    "apps/web/src/components/sidebar/PromptLibraryEditorDialog.tsx"
+  ],
+  "tags": ["prompts", "sidebar", "command-palette", "productivity"]
+}

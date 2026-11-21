@@ -1,0 +1,128 @@
+diff --git a/apps/web/src/components/CommandPalette.tsx b/apps/web/src/components/CommandPalette.tsx
+index 912f294d9..667d05771 100644
+--- a/apps/web/src/components/CommandPalette.tsx
++++ b/apps/web/src/components/CommandPalette.tsx
+@@ -42,6 +42,7 @@ import { useLocation, useNavigate, useParams } from "@tanstack/react-router";
+ import * as Option from "effect/Option";
+ import {
+   ArrowLeftIcon,
++  BookOpenIcon,
+   ChartNoAxesColumnIcon,
+   CornerLeftUpIcon,
+   FileSearchIcon,
+@@ -146,6 +147,7 @@ import {
+   buildLinkedThreadActionItems,
+   enumerateCommandPaletteItems,
+   type CommandPaletteActionItem,
++  type CommandPaletteGroup,
+   type CommandPaletteOpenIntent,
+   type CommandPaletteSubmenuItem,
+   type CommandPaletteView,
+@@ -169,6 +171,9 @@ import { ProjectFilePicker } from "./files/ProjectFilePicker";
+ import { openLinkPullRequestDialog } from "./pullRequest/LinkPullRequestDialog";
+ import { ProjectContentSearchDialog } from "./search/ProjectContentSearchDialog";
+ import { toggleThemeEditorForTheme } from "./settings/themeEditorStore";
++import { filterLibraryPrompts } from "./sidebar/PromptLibraryShelf.logic";
++import { usePromptLibraryStore } from "../promptLibraryStore";
++import { usePromptLibraryUiStore } from "../promptLibraryUiStore";
+ import { searchSettings, SETTINGS_SECTION_LABELS } from "./settings/settingsSearch";
+ import {
+   COMMAND_PALETTE_META_ICON_CLASS,
+@@ -685,6 +690,7 @@ function OpenCommandPaletteDialog(props: {
+   readonly clearOpenIntent: () => void;
+ }) {
+   const navigate = useNavigate();
++  const composerHandleRef = useComposerHandleContext();
+   const pathname = useLocation({ select: (location) => location.pathname });
+   const { clearOpenIntent, openIntent, openOverlayMode, setOpen } = props;
+   const [query, setQuery] = useState(openIntent?.kind === "search" ? openIntent.query : "");
+@@ -715,6 +721,8 @@ function OpenCommandPaletteDialog(props: {
+   const desktopLocalBootstraps = useDesktopLocalBootstraps();
+   const primaryEnvironmentId = usePrimaryEnvironmentId();
+   const availableSettingsSearchItems = useAvailableSettingsSearchItems();
++  const promptLibraryEntries = usePromptLibraryStore((state) => state.entries);
++  const openPromptLibraryNew = usePromptLibraryUiStore((state) => state.openNew);
+   const { activeDraftThread, activeThread, defaultProjectRef, handleNewThread } =
+     useHandleNewThread();
+   const projects = useProjects();
+@@ -2078,7 +2086,59 @@ function OpenCommandPaletteDialog(props: {
+     });
+   }
+ 
+-  const rootGroups = buildRootGroups({ actionItems, recentThreadItems });
++  actionItems.push({
++    kind: "action",
++    value: "prompt-library:save",
++    searchTerms: ["save current prompt", "prompt library"],
++    title: "Save current prompt to library",
++    icon: <BookOpenIcon className={ITEM_ICON_CLASS} />,
++    run: async () => {
++      const text = composerHandleRef?.current?.readSnapshot().value ?? "";
++      if (!text.trim()) {
++        toastManager.add(
++          stackedThreadToast({
++            type: "info",
++            title: "Nothing to save",
++            description: "Type a prompt in the composer first.",
++          }),
++        );
++        return;
++      }
++      openPromptLibraryNew(text);
++    },
++  });
++
++  const promptLibraryGroup: CommandPaletteGroup = {
++    value: "prompt-library",
++    label: "Prompt Library",
++    items: filterLibraryPrompts(promptLibraryEntries, deferredQuery).map((entry) => ({
++      kind: "action",
++      value: `prompt-library:${entry.id}`,
++      searchTerms: [entry.title],
++      title: entry.title,
++      description: "Prompt Library",
++      icon: <BookOpenIcon className={ITEM_ICON_CLASS} />,
++      run: async () => {
++        const composer = composerHandleRef?.current;
++        if (!composer || !composer.insertTextAtEnd(entry.text, { ensureLeadingBoundary: true })) {
++          toastManager.add(
++            stackedThreadToast({
++              type: "error",
++              title: "Couldn't insert prompt",
++              description: "Open a thread and try again.",
++            }),
++          );
++          return;
++        }
++        composer.focusAtEnd();
++      },
++    })),
++  };
++
++  const rootGroups = [
++    ...buildRootGroups({ actionItems, recentThreadItems }),
++    ...(promptLibraryGroup.items.length > 0 ? [promptLibraryGroup] : []),
++  ];
+   const settingsSearchItems: CommandPaletteActionItem[] = searchSettings(
+     deferredQuery,
+     availableSettingsSearchItems,
+diff --git a/apps/web/src/components/Sidebar.tsx b/apps/web/src/components/Sidebar.tsx
+index a03196fc3..14d82efaf 100644
+--- a/apps/web/src/components/Sidebar.tsx
++++ b/apps/web/src/components/Sidebar.tsx
+@@ -1,4 +1,6 @@
+ import { requestCustomSnooze } from "./CustomSnoozeDialog";
++import { PromptLibraryEditorDialog } from "./sidebar/PromptLibraryEditorDialog";
++import { PromptLibraryShelf } from "./sidebar/PromptLibraryShelf";
+ import { useSupportsMultiplePullRequests } from "~/hooks/useSupportsMultiplePullRequests";
+ import { resolveThreadCurrentPullRequestLink } from "@t3tools/shared/threadPullRequests";
+ import { useAtomValue } from "@effect/atom-react";
+@@ -4593,6 +4595,8 @@ export default function Sidebar() {
+         }
+       >
+         <SidebarGroup className="ps-[calc(var(--sidebar-content-inset)+1px)] pe-[var(--sidebar-content-inset)] pb-1 pt-0 flex-1">
++          <PromptLibraryShelf />
++          <PromptLibraryEditorDialog />
+           {isSearchingThreads ? (
+             threadSearchResults.length > 0 ? (
+               <TooltipProvider
