@@ -1,16 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="128" height="128">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#d946ef"/>
-      <stop offset="100%" stop-color="#d946ef" stop-opacity="0.7"/>
-    </linearGradient>
-  </defs>
-  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#g)"/>
-  
-  <circle cx="32" cy="30" r="8" fill="none" stroke="#fff" stroke-width="2.5"/>
-  <path d="M24 38 Q32 46 40 38" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
-  <circle cx="28" cy="28" r="1.5" fill="#fff"/>
-  <circle cx="36" cy="28" r="1.5" fill="#fff"/>
-  <path d="M32 14 L34 18 L30 18 Z" fill="#fff"/>
- 
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 152 152" width="152" height="152">
+  <path d="M 151.99998686523438 75.99997324218748 C 151.99998686523438 34.02634042968748 117.97358916015625 -2.675781252037268e-05 75.99998686523438 -2.675781252037268e-05 M 75.99998686523438 -2.675781252037268e-05 C 34.026399829101564 -2.675781252037268e-05 2.1240234389097168e-06 34.02634042968748 2.1240234389097168e-06 75.99997324218748 M 2.1240234389097168e-06 75.99997324218748 C 2.1240234389097168e-06 117.97366708984373 34.026399829101564 151.99997324218748 75.99998686523438 151.99997324218748 M 75.99998686523438 151.99997324218748 C 117.97358916015625 151.99997324218748 151.99998686523438 117.97366708984373 151.99998686523438 75.99997324218748" fill="#d45b90" fill-opacity="0.11999999731779099"/>
+  <path d="M 40.999986865234376 111.99997324218748 L 102.99998686523438 49.99997324218748" fill="none" stroke="#d45b90" stroke-width="12.0" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 95.99998686523438 55.99997324218748 L 122.99998686523438 27.99997324218748 M 122.99998686523438 27.99997324218748 L 109.99998686523438 62.99997324218748 M 109.99998686523438 62.99997324218748 L 95.99998686523438 55.99997324218748" fill="#d45b90"/>
+  <path d="M 29.00000212402344 35.99997324218748 L 42.999986865234376 35.99997324218748" fill="none" stroke="#d45b90" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 35.999986865234376 42.99997324218748 L 35.999986865234376 28.99997324218748" fill="none" stroke="#d45b90" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 110.99998686523438 105.99997324218748 L 124.99998686523438 105.99997324218748" fill="none" stroke="#d45b90" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 117.99998686523438 112.99997324218748 L 117.99998686523438 98.99997324218748" fill="none" stroke="#d45b90" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 113.99998686523438 35.99997324218748 L 127.99998686523438 35.99997324218748" fill="none" stroke="#d45b90" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 120.99998686523438 42.99997324218748 L 120.99998686523438 28.99997324218748" fill="none" stroke="#d45b90" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
