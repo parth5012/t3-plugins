@@ -9,6 +9,7 @@ A community collection of themes, wallpaper/artwork assets, and plugins for [T3 
 | [`themes/`](./themes/) | The five built-in T3 Code palettes, plus [`themes/community/`](./themes/community/) — the 32-theme animated/classic collection created in the T3 Code UI Customization thread. All in the app's native JSON format; drop one into Settings → Appearance → Import theme. |
 | [`wallpapers/`](./wallpapers/) | Background/artwork SVGs shipped with T3 Code (marketing nightly sky, dev and nightly app-icon backgrounds). |
 | [`plugins/`](./plugins/) | Plugins, each with a `plugin.json` manifest, drop-in `files/`, an optional host patch, tests, and a demo. |
+| [`project-icons/`](./project-icons/) | The 36 SVG favicons used for T3 Code project icons. |
 
 ## Theme format
 
